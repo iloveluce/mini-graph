@@ -1,0 +1,67 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script   src="https://code.jquery.com/jquery-2.2.3.js"   integrity="sha256-laXWtGydpwqJ8JA+X9x2miwmaiKhn8tVmOVEigRNtP4="   crossorigin="anonymous"></script>
+<!-- load D3js -->
+<script src="http://www.d3plus.org/js/d3.js"></script>
+
+<!-- load topojson library -->
+<script src="http://www.d3plus.org/js/topojson.js"></script>
+
+<!-- load D3plus after D3js -->
+<script src="http://www.d3plus.org/js/d3plus.js"></script>
+
+<script src="citysdk-master/js/citysdk.js"></script>
+<script src="citysdk-master/js/citysdk.census.js"></script>
+<!-- create container element for visualization -->
+<div id="viz"></div>
+
+<script>
+  // sample data array
+
+  var sdk = new CitySDK();
+  var census = sdk.modules.census;
+  census.enable("2eb229f1d013f8e8f0fe87f28e8967d9ac98eb35");
+
+  var request = {
+    "zip": "02138",
+    "variables": [
+        "income",
+        "population"
+    ],
+    "level": "tract"
+}//{
+//     "level": "county",
+//     "zip": "33020",
+//     "variables": [
+//         "income",
+//         "income_per_capita",
+//         "poverty"
+//     ],
+//     "api": "acs5",
+//     "year": "2013"
+// }
+
+    census.GEORequest(request, function (response) {
+
+   console.log(response)
+
+    });
+  var sample_data = [
+    {"value": 2315987123, "id": 35015, "name": "United States"},
+    {"value": 38157121349, "id": 39079, "name": "China"},
+    {"value": 21891735098, "id": 19049, "name": "Spain"},
+    {"value": 9807134982, "id": 12011, "name": "Broward"}
+  ]
+  // instantiate d3plus
+  var visualization = d3plus.viz()
+    .container("#viz")        // container DIV to hold the visualization
+    .data(sample_data)        // data to use with the visualization
+    .coords("us.json") // pass topojson coordinates
+    .type("geo_map")          // visualization type
+    .id("id")            // key for which our data is unique on
+    .text("name")             // key to use for display text
+    .color("value")           // key for coloring countries
+    .tooltip("value")         // keys to place in tooltip
+    .draw()                   // finally, draw the visualization!
+</script>
