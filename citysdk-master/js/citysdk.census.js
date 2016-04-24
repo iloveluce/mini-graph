@@ -31,7 +31,7 @@ CensusModule.prototype.DEFAULT_API = "acs5";
 CensusModule.prototype.DEFAULT_ENDPOINTS = {};
 CensusModule.prototype.DEFAULT_ENDPOINTS.acsVariableDictionaryURL = "//api.census.gov/data/";
 CensusModule.prototype.DEFAULT_ENDPOINTS.geocoderURL = "//geocoding.geo.census.gov/geocoder/geographies/";
-CensusModule.prototype.DEFAULT_ENDPOINTS.tigerwebURL = "//tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/";
+CensusModule.prototype.DEFAULT_ENDPOINTS.tigerwebURL = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/";
 CensusModule.prototype.DEFAULT_ENDPOINTS.censusURL = "//api.census.gov/data/";
 
 

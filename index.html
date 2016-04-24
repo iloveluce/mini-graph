@@ -1,6 +1,7 @@
 <!doctype html>
 <meta charset="utf-8">
 
+<link rel="stylesheet" type="text/css" href="css/uswds.css">
 <script   src="https://code.jquery.com/jquery-2.2.3.js"   integrity="sha256-laXWtGydpwqJ8JA+X9x2miwmaiKhn8tVmOVEigRNtP4="   crossorigin="anonymous"></script>
 <!-- load D3js -->
 <script src="http://www.d3plus.org/js/d3.js"></script>
@@ -17,51 +18,66 @@
 <div id="viz"></div>
 
 <script>
-  // sample data array
+
+function RequestData(){
+  var request = {
+      "level":"state",
+      "state": "AL" ,
+      "variables": [
+          "B19083_001E",
+          "B19083_001M"
+          // "income",
+      ],
+      "sublevel": true
+  }
 
   var sdk = new CitySDK();
   var census = sdk.modules.census;
   census.enable("2eb229f1d013f8e8f0fe87f28e8967d9ac98eb35");
 
-  var request = {
-    "zip": "02138",
-    "variables": [
-        "income",
-        "population"
-    ],
-    "level": "tract"
-}//{
-//     "level": "county",
-//     "zip": "33020",
-//     "variables": [
-//         "income",
-//         "income_per_capita",
-//         "poverty"
-//     ],
-//     "api": "acs5",
-//     "year": "2013"
-// }
+  var data = []
 
-    census.GEORequest(request, function (response) {
-
-   console.log(response)
-
+  Object.keys(CensusModule.prototype.stateCapitals).forEach(function(d){
+    request["state"] = d
+    census.APIRequest(request, function (response) {
+      console.log(response)
+      response.data.forEach(function(d){
+        var datum = {}
+        datum["id"] = parseInt(d["state"] + d["county"])
+        datum["name"] = d["name"]
+        datum["Gini Index"] = parseFloat(d["B19083_001E"])
+        datum["Gini Margin of Error"] = parseFloat(d["B19083_001M"])
+        data.push(datum)
+      })
     });
-  var sample_data = [
-    {"value": 2315987123, "id": 35015, "name": "United States"},
-    {"value": 38157121349, "id": 39079, "name": "China"},
-    {"value": 21891735098, "id": 19049, "name": "Spain"},
-    {"value": 9807134982, "id": 12011, "name": "Broward"}
-  ]
-  // instantiate d3plus
+  })
+}
+
+
+
+  function htmlLink (d){
+      var s_id = String(d)
+      // work around because when id was converted to int the first 0 might have been lost
+      if(s_id.length < 5){
+        s_id = "0" + s_id
+      }
+
+      var gini_link =  "http://factfinder.census.gov/bkmk/table/1.0/en/ACS/14_5YR/B19083/0500000US" + s_id
+      var ec_link = "http://factfinder.census.gov/bkmk/table/1.0/en/ACS/14_5YR/DP03/0500000US" + s_id
+      var gini_button = "<a href='"+ gini_link +"' >Gini index data</a>"
+      var ec_button = "<a href='"+ ec_link +"' >Economic characteristics</a>"
+      return gini_button +"<br>" + ec_button
+  }
   var visualization = d3plus.viz()
     .container("#viz")        // container DIV to hold the visualization
-    .data(sample_data)        // data to use with the visualization
+   .data("gini_data.json")        // data to use with the visualization
     .coords("us.json") // pass topojson coordinates
     .type("geo_map")          // visualization type
     .id("id")            // key for which our data is unique on
-    .text("name")             // key to use for display text
-    .color("value")           // key for coloring countries
-    .tooltip("value")         // keys to place in tooltip
+    .text("name")
+    .title("Gini Index of US Counties")
+    .labels(false)             // key to use for display text
+    .color("Gini Index")           // key for coloring countries
+    .tooltip({"value":["Gini Index","Gini Margin of Error" ],"html":htmlLink})         // keys to place in tooltip
     .draw()                   // finally, draw the visualization!
 </script>
