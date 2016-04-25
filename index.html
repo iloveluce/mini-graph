@@ -79,9 +79,11 @@ function RequestData(){
     .color({"heatmap":  ["#ffeda0","#feb24c","#de2d26"]})
     //["#e0ecf4","#9ebcda","#8856a7"]
     //"#edf8b1","#7fcdbb","#2c7fb8"
-    .title("Gini Index of US Counties")
+    .title({"value":"Gini Index of US Counties","position":"bottom"})
     .labels(false)             // key to use for display text
     .color("Gini Index")           // key for coloring countries
+    .footer({"value":"Data from the US Census."})
+    //.legend({"align":"start","text":"foo", "labels":true})
     .tooltip({"value":["Gini Index","Gini Margin of Error" ],"html":htmlLink})         // keys to place in tooltip
     .draw()                   // finally, draw the visualization!
 </script>
