@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8">
 
-<link rel="stylesheet" type="text/css" href="css/uswds.css">
+<!--- jQuery -->
 <script   src="https://code.jquery.com/jquery-2.2.3.js"   integrity="sha256-laXWtGydpwqJ8JA+X9x2miwmaiKhn8tVmOVEigRNtP4="   crossorigin="anonymous"></script>
 <!-- load D3js -->
 <script src="http://www.d3plus.org/js/d3.js"></script>
@@ -12,8 +12,11 @@
 <!-- load D3plus after D3js -->
 <script src="http://www.d3plus.org/js/d3plus.js"></script>
 
+<!-- CitySDK -->
 <script src="citysdk-master/js/citysdk.js"></script>
 <script src="citysdk-master/js/citysdk.census.js"></script>
+
+
 <!-- create container element for visualization -->
 <div id="viz"></div>
 
@@ -24,9 +27,9 @@ function RequestData(){
       "level":"state",
       "state": "AL" ,
       "variables": [
-          "B19083_001E",
-          "B19083_001M"
-          // "income",
+          "income",
+          "B19083_001E", // Gini coefficient
+          "B19083_001M", // Gini coefficient Margin of error
       ],
       "sublevel": true
   }
@@ -36,54 +39,52 @@ function RequestData(){
   census.enable("2eb229f1d013f8e8f0fe87f28e8967d9ac98eb35");
 
   var data = []
-
   Object.keys(CensusModule.prototype.stateCapitals).forEach(function(d){
     request["state"] = d
     census.APIRequest(request, function (response) {
-      console.log(response)
       response.data.forEach(function(d){
         var datum = {}
         datum["id"] = parseInt(d["state"] + d["county"])
         datum["name"] = d["name"]
         datum["Gini Index"] = parseFloat(d["B19083_001E"])
         datum["Gini Margin of Error"] = parseFloat(d["B19083_001M"])
+        datum["Median Income"] = parseFloat(d["income"])
         data.push(datum)
       })
     });
   })
   return data
 }
+//var data = RequestData()
 
 
-
-  function htmlLink (d){
-      var s_id = String(d)
-      // work around because when id was converted to int the first 0 might have been lost
-      if(s_id.length < 5){
-        s_id = "0" + s_id
-      }
-
-      var gini_link =  "http://factfinder.census.gov/bkmk/table/1.0/en/ACS/14_5YR/B19083/0500000US" + s_id
-      var ec_link = "http://factfinder.census.gov/bkmk/table/1.0/en/ACS/14_5YR/DP03/0500000US" + s_id
-      var gini_button = "<a href='"+ gini_link +"' >Gini index data</a>"
-      var ec_button = "<a href='"+ ec_link +"' >Economic characteristics</a>"
-      return gini_button +"<br>" + ec_button
+function htmlLink (d){
+  var s_id = String(d)
+  // work around: When id was converted to int, the first 0 might have been lost
+  if(s_id.length < 5){
+    s_id = "0" + s_id
   }
-  var visualization = d3plus.viz()
-    .container("#viz")        // container DIV to hold the visualization
-    .data("gini_data.json")        // data to use with the visualization
-    .coords("us.json") // pass topojson coordinates
-    .type("geo_map")          // visualization type
-    .id("id")            // key for which our data is unique on
-    .text("name")
-    .color({"heatmap":  ["#ffeda0","#feb24c","#de2d26"]})
-    //["#e0ecf4","#9ebcda","#8856a7"]
-    //"#edf8b1","#7fcdbb","#2c7fb8"
-    .title({"value":"Gini Index of US Counties","position":"bottom"})
-    .labels(false)             // key to use for display text
-    .color("Gini Index")           // key for coloring countries
-    .footer({"value":"Data from the US Census."})
-    //.legend({"align":"start","text":"foo", "labels":true})
-    .tooltip({"value":["Gini Index","Gini Margin of Error" ],"html":htmlLink})         // keys to place in tooltip
-    .draw()                   // finally, draw the visualization!
+
+  var gini_link =  "http://factfinder.census.gov/bkmk/table/1.0/en/ACS/14_5YR/B19083/0500000US" + s_id
+  var ec_link = "http://factfinder.census.gov/bkmk/table/1.0/en/ACS/14_5YR/DP03/0500000US" + s_id
+  var gini_button = "<a href='"+ gini_link +"' >Gini index data</a>"
+  var ec_button = "<a href='"+ ec_link +"' >Economic characteristics</a>"
+  return gini_button +"<br>" + ec_button
+}
+var visualization = d3plus.viz()
+  .container("#viz")        // container DIV to hold the visualization
+  .data("gini_data.json")        // data to use with the visualization
+  .coords("us.json") // pass topojson coordinates
+  .type("geo_map")          // visualization type
+  .id("id")            // key for which our data is unique on
+  .text("name")
+  .color({"heatmap":  ["#ffeda0","#feb24c","#de2d26"]})
+  //["#e0ecf4","#9ebcda","#8856a7"] // other possible color schemes
+  //"#edf8b1","#7fcdbb","#2c7fb8"
+  .title({"value":"Gini Index of US Counties","position":"bottom"})
+  .labels(false)
+  .color("Gini Index")           // key for coloring countries
+  .footer({"value":"Data from the US Census CitySDK.","link":"http://uscensusbureau.github.io/citysdk/"})
+  .tooltip({"value":["Gini Index","Gini Margin of Error" ],"html":htmlLink})
+  .draw()
 </script>
