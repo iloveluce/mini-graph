@@ -51,6 +51,7 @@ function RequestData(){
       })
     });
   })
+  return data
 }
 
 
@@ -70,11 +71,14 @@ function RequestData(){
   }
   var visualization = d3plus.viz()
     .container("#viz")        // container DIV to hold the visualization
-   .data("gini_data.json")        // data to use with the visualization
+    .data("gini_data.json")        // data to use with the visualization
     .coords("us.json") // pass topojson coordinates
     .type("geo_map")          // visualization type
     .id("id")            // key for which our data is unique on
     .text("name")
+    .color({"heatmap":  ["#ffeda0","#feb24c","#de2d26"]})
+    //["#e0ecf4","#9ebcda","#8856a7"]
+    //"#edf8b1","#7fcdbb","#2c7fb8"
     .title("Gini Index of US Counties")
     .labels(false)             // key to use for display text
     .color("Gini Index")           // key for coloring countries
