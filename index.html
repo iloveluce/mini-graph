@@ -67,8 +67,8 @@ function htmlLink (d){
 
   var gini_link =  "http://factfinder.census.gov/bkmk/table/1.0/en/ACS/14_5YR/B19083/0500000US" + s_id
   var ec_link = "http://factfinder.census.gov/bkmk/table/1.0/en/ACS/14_5YR/DP03/0500000US" + s_id
-  var gini_button = "<a href='"+ gini_link +"' >Gini index data</a>"
-  var ec_button = "<a href='"+ ec_link +"' >Economic characteristics</a>"
+  var gini_button = "<a href='"+ gini_link +"'  style='padding:6px;'>Gini index data</a>"
+  var ec_button = "<a href='"+ ec_link +"' style='padding:6px;'>Economic characteristics</a>"
   return gini_button +"<br>" + ec_button
 }
 var visualization = d3plus.viz()
