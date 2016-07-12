@@ -20,7 +20,12 @@
 <!-- create container element for visualization -->
 <div id="viz"></div>
 
+
 <script>
+
+// http://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?pid=ACS_14_5YR_B19083&prodType=table
+var US_gini = 0.4760
+
 
 function RequestData(){
   var request = {
@@ -60,6 +65,7 @@ function RequestData(){
 
 function htmlLink (d){
   var s_id = String(d)
+
   // work around: When id was converted to int, the first 0 might have been lost
   if(s_id.length < 5){
     s_id = "0" + s_id
@@ -71,9 +77,45 @@ function htmlLink (d){
   var ec_button = "<a href='"+ ec_link +"' style='padding:6px;'>Economic characteristics</a>"
   return gini_button +"<br>" + ec_button
 }
+
+
+
+function gini_mean(data){
+    var avg = 0;
+    data.forEach(function(d){
+      avg += d["Gini Index"]
+    });
+    avg /= data.length
+    return avg;
+}
+function gini_standard_deviation(data, mean){
+    var squareDiffs = data.map(function(value){
+      var diff = value["Gini Index"] - mean;
+      var sqDiff = diff * diff;
+      return sqDiff;
+    })
+    var avgSquareDiff = squareDiffs.reduce(function(sum, value){
+        return sum + value;
+      }, 0) ;
+    avgSquareDiff /=  squareDiffs.length;
+    return Math.sqrt(avgSquareDiff);
+}
+
+
+d3.json("gini_data.json", function(json) {
+
+  var giniAvg =  gini_mean(json);
+  var giniStdDev =gini_standard_deviation(json, giniAvg)
+
+
+
+  json.forEach(function(value){
+    value["Normalized Gini Index Score"] =  (value["Gini Index"] -  giniAvg) / giniStdDev
+  })
+
 var visualization = d3plus.viz()
   .container("#viz")        // container DIV to hold the visualization
-  .data("gini_data.json")        // data to use with the visualization
+  .data(json)        // data to use with the visualization
   .coords("us.json") // pass topojson coordinates
   .type("geo_map")          // visualization type
   .id("id")            // key for which our data is unique on
@@ -81,10 +123,29 @@ var visualization = d3plus.viz()
   .color({"heatmap":  ["#ffeda0","#feb24c","#de2d26"]})
   //["#e0ecf4","#9ebcda","#8856a7"] // other possible color schemes
   //"#edf8b1","#7fcdbb","#2c7fb8"
-  .title({"value":"Gini Index of US Counties","position":"bottom"})
+  .title({"value":"Normalized Gini Index of US Counties","position":"bottom"})
   .labels(false)
-  .color("Gini Index")           // key for coloring countries
+  .color("Normalized Gini Index Score")           // key for coloring countries
   .footer({"value":"Data from the US Census CitySDK.","link":"http://uscensusbureau.github.io/citysdk/"})
   .tooltip({"value":["Gini Index","Gini Margin of Error" ],"html":htmlLink})
   .draw()
+
+})
+
+// var visualization = d3plus.viz()
+//   .container("#viz")        // container DIV to hold the visualization
+//   .data("gini_data.json")        // data to use with the visualization
+//   .coords("us.json") // pass topojson coordinates
+//   .type("geo_map")          // visualization type
+//   .id("id")            // key for which our data is unique on
+//   .text("name")
+//   .color({"heatmap":  ["#ffeda0","#feb24c","#de2d26"]})
+//   //["#e0ecf4","#9ebcda","#8856a7"] // other possible color schemes
+//   //"#edf8b1","#7fcdbb","#2c7fb8"
+//   .title({"value":"Gini Index of US Counties","position":"bottom"})
+//   .labels(false)
+//   .color("Gini Index")           // key for coloring countries
+//   .footer({"value":"Data from the US Census CitySDK.","link":"http://uscensusbureau.github.io/citysdk/"})
+//   .tooltip({"value":["Gini Index","Gini Margin of Error" ],"html":htmlLink})
+//   .draw()
 </script>
